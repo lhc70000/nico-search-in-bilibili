@@ -169,10 +169,9 @@ body>.biliHintBox em {\
 				if (!self.hasClass('loaded')) {
 					// perform search if never searched
 					GM_xmlhttpRequest({
-                        method: "GET",
+            method: "GET",
 						url: self.data('link'),
 						onload: function (response) {
-                            console.log(response);
 							var bResult = $(response.responseText).find('.video.matrix').on('mouseover', function () {
 								var vm = $(this);
 								showHint(vm.find('.des').html(), {
