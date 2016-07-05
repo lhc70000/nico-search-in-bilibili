@@ -1,10 +1,14 @@
 // ==UserScript==
 // @name         SearchInBilibili
 // @namespace    SearchInBilibili
+// @version      0.1
+// @description  Search related videos in bilibili right in a niconico video page
+// @author       lhc70000
 // @include      http://www.nicovideo.jp/watch/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js
+// @grant        GM_xmlhttpRequest
+// @connect      search.bilibili.com
 // ==/UserScript==
-
 (function () {
 	var cssText = '\
 body>.biliHintBox {\
@@ -150,10 +154,10 @@ body>.biliHintBox em {\
 		var hintBox = $('<div class="biliHintBox"></div>').appendTo($('body')).hide();
 		var showHint = function (text, pos) {
 			hintBox.html(text).offset(pos).show();
-		}
+		};
 		var hideHint = function () {
 			hintBox.hide();
-		}
+		};
 		var bResult;
 		// on click
 		searchBtn.on('click', function () {
@@ -165,8 +169,10 @@ body>.biliHintBox em {\
 				if (!self.hasClass('loaded')) {
 					// perform search if never searched
 					GM_xmlhttpRequest({
+                        method: "GET",
 						url: self.data('link'),
 						onload: function (response) {
+                            console.log(response);
 							var bResult = $(response.responseText).find('.video.matrix').on('mouseover', function () {
 								var vm = $(this);
 								showHint(vm.find('.des').html(), {
@@ -193,7 +199,7 @@ body>.biliHintBox em {\
 				window.setTimeout(function () {
 					$('body').one('click', function () {
 						self.removeClass('open');
-					})
+					});
 				}, 10);
 			}
 		});
