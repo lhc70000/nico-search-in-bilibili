@@ -28,7 +28,8 @@ background-color: #ffffaa;\
 }\
 #searchInBilibili {\
 position: relative;\
-padding-left: 10px;\
+display: table-cell;\
+vertical-align: middle;\
 }\
 #searchInBilibili>a {\
 height: 20px;\
@@ -47,7 +48,7 @@ color: #333;\
 font-size: 11px;\
 position: absolute;\
 background: #f5f5f5;\
-left: 135px;\
+right: 135px;\
 width: 360px;\
 height: 320px;\
 top: -200px;\
@@ -162,7 +163,7 @@ background: #2bc6f9;\
     $('head').append($('<style>' + cssText + '</style>'));
     $(function () {
         var smNum;
-        var li = $('<li id="searchInBilibili"><a>Bilibili で検索</a></li>');
+        var li = $('<div id="searchInBilibili"><a>Bilibili で検索</a></div>');
         var searchBtn = li.find('a');
         var searchWindow = $('<div class="searchBox"></div>').appendTo(li);
         var hintBox = $('<div class="biliHintBox"></div>').appendTo($('body')).hide();
@@ -182,7 +183,7 @@ background: #2bc6f9;\
                 self.addClass('open');
                 var newSmNum = document.location.pathname.split('/').pop();
                 var bLink = 'http://search.bilibili.com/all?keyword=' + newSmNum;
-                var nicozonLink = 'http://www.nicozon.net/watch/' + newSmNum.replace('sm', '');
+                var nicozonLink = 'http://nicozon.net/downloader.html?video_id=sm' + newSmNum.replace('sm', '');
                 var bdLink = 'https://www.google.com.hk/?gws_rd=ssl#newwindow=1&safe=strict&q=' + $('#videoHeaderDetail h2').text() + ' site:pan.baidu.com';
                 if (newSmNum != smNum) {
                     smNum = newSmNum;
@@ -228,7 +229,7 @@ background: #2bc6f9;\
                 }, 10);
             }
         });
-        var ul = $('ul.videoStats');
+        var ul = $('.VideoMetaContainer');
         ul.append(li);
     });
 })();
