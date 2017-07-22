@@ -183,7 +183,7 @@ background: #2bc6f9;\
                 self.addClass('open');
                 var newSmNum = document.location.pathname.split('/').pop();
                 var bLink = 'http://search.bilibili.com/all?keyword=' + newSmNum;
-                var nicozonLink = 'http://nicozon.net/downloader.html?video_id=sm' + newSmNum.replace('sm', '');
+                var nicozonLink =  'http://www.nicozon.net/downloader.html?video_id=' + newSmNum + '&eco=0/';
                 var bdLink = 'https://www.google.com.hk/?gws_rd=ssl#newwindow=1&safe=strict&q=' + $('#videoHeaderDetail h2').text() + ' site:pan.baidu.com';
                 if (newSmNum != smNum) {
                     smNum = newSmNum;
