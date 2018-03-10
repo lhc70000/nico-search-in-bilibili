@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         SearchInBilibili
 // @namespace    SearchInBilibili
-// @version      0.2
+// @version      0.3
 // @description  Search related videos in bilibili right in a niconico video page
 // @author       lhc70000
 // @include      http://www.nicovideo.jp/watch/*
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js
 // @grant        GM_xmlhttpRequest
 // @connect      search.bilibili.com
+// @connect      hdslb.com
 // ==/UserScript==
 (function () {
     var cssText = '\
@@ -173,6 +174,31 @@ background: #2bc6f9;\
         var hideHint = function () {
             hintBox.hide();
         };
+        var formatDate = function (date) {
+            return date.getFullYear() + "-" + date.getMonth() + "-" + date.getDate();
+        };
+        var buildHTML = function (data) {
+            return $('<div class="video matrix"><a href="' + data.arcurl + '" target="_blank" title="' + data.title + '"><div class="img"><img alt="" url="https:' + data.pic + '@320w_200h.jpg"></div></a><div class="info"><div class="headline clearfix"><span class="type avid">av' + data.id + '</span><span class="type hide">' + data.typename + '</span><a title="' + data.title + '" href="' + data.arcurl + '" target="_blank" class="title">' + data.title + '</a></div><div class="des hide">' + data.description + '</div><div class="tags"><span title="观看" class="so-icon watch-num"><i class="icon-playtime"></i>' + data.play + '</span><span title="弹幕" class="so-icon hide"><i class="icon-subtitle"></i>' + data.video_review + '</span><span title="上传时间" class="so-icon time"><i class="icon-date"></i>' + formatDate(new Date(data.pubdate*1000)) + '</span><span title="up主" class="so-icon"><i class="icon-uper"></i><a href="//space.bilibili.com/797614?from=search&amp;seid=9904936649729939500" target="_blank" class="up-name">' + data.author + '</a></span></div></div></div>');
+        };
+        var loadImg = function(i, e) {
+            var img = $(e);
+            var url = img.attr("url");
+            GM_xmlhttpRequest({
+                method: "GET",
+                url: url,
+                headers: {
+                    referer: 'http://search.bilibili.com/all?keyword=' + smNum
+                },
+                responseType: 'blob',
+                onload: function (response) {
+                    var reader = new FileReader();
+                    reader.onloadend = function() {
+                        img.attr("src", reader.result);
+                    };
+                    reader.readAsDataURL(response.response);
+                }
+            });
+        };
         var bResult;
         // on click
         searchBtn.on('click', function () {
@@ -182,8 +208,8 @@ background: #2bc6f9;\
             } else {
                 self.addClass('open');
                 var newSmNum = document.location.pathname.split('/').pop();
-                var bLink = 'http://search.bilibili.com/all?keyword=' + newSmNum;
-                var nicozonLink =  'http://www.nicozon.net/downloader.html?video_id=' + newSmNum + '&eco=0/';
+                var bLink = 'http://search.bilibili.com/api/search?search_type=all&keyword=' + newSmNum;
+                var nicozonLink =  'http://www.nicozon.net/downloader.html?video_id=' + newSmNum + '&eco=0/';;
                 var bdLink = 'https://www.google.com.hk/?gws_rd=ssl#newwindow=1&safe=strict&q=' + $('#videoHeaderDetail h2').text() + ' site:pan.baidu.com';
                 if (newSmNum != smNum) {
                     smNum = newSmNum;
@@ -196,16 +222,7 @@ background: #2bc6f9;\
                     method: "GET",
                     url: bLink,
                     onload: function (response) {
-                        console.log(response);
-                        var bResult = $(response.responseText).find('.video.matrix').on('mouseover', function () {
-                            var vm = $(this);
-                            showHint(vm.find('.des').html(), {
-                                top: vm.offset().top,
-                                left: vm.offset().left + vm.outerWidth()
-                            });
-                        }).on('mouseleave', function () {
-                            hideHint();
-                        });
+                        var bResult = JSON.parse(response.responseText).result.video.map(buildHTML).reduce(function(a,c){return a.add(c);});
                         // add download link from bilibilijj
                         bResult.each(function () {
                             var vm = $(this);
@@ -219,6 +236,7 @@ background: #2bc6f9;\
                         searchWindow.append('<a class="nicozonBtn" target="_blank" href="' + nicozonLink + '">Nicozon で動画を保存</a>');
                         searchWindow.append('<a class="bdBtn" target="_blank" href="' + bdLink + '">BaiduNetdisk で検索</a>');
                         self.addClass('loaded');
+                        bResult.find("img").each(loadImg);
                     }
                 });
                 // close search window when clicking outside
